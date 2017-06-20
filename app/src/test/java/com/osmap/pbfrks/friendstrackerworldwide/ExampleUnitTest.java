@@ -1,4 +1,4 @@
-package com.osmap.pbfrks.myapplication;
+package com.osmap.pbfrks.friendstrackerworldwide;
 
 import org.junit.Test;
 

@@ -1,8 +1,8 @@
-package com.osmap.pbfrks.myapplication;
+package com.osmap.pbfrks.friendstrackerworldwide;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -10,13 +10,18 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
@@ -25,73 +30,69 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
 import static android.location.LocationManager.GPS_PROVIDER;
-import static com.osmap.pbfrks.myapplication.R.id.add;
-import static com.osmap.pbfrks.myapplication.R.id.textView1;
 
 public class MainActivity extends AppCompatActivity {
     private MapView osm;
     private MapController mc;
-    private TextView textView;
+    private TextView textGeoLocation;
     private LocationManager locationManager;
     private LocationListener locationListener;
     Location location;
-    GeoPoint myGeoPoint;
-
+    private String myUsername;
 
     @Override
-    /*
-     * This method uses the StrictMode Policy settings to allow
-     * API calls via the Main Activity
-     *
-     * It also uses the main.xml as first shown layout
-     *
-     * It uses the MAPNIK map version of OpenStreetMap for drawing a map
-     * and enables zoom-buttons as well as navigating using two fingers
-     * on the mobile device
-     */
     protected void onCreate(Bundle savedInstanceState) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-
         Context ctx = getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
 
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Intent intent = getIntent();
+        myUsername = intent.getStringExtra(LoginActivity.EXTRA_MESSAGE);
         osm = (MapView) findViewById(R.id.mapView);
         osm.setTileSource(TileSourceFactory.MAPNIK);
         osm.setBuiltInZoomControls(true);
         osm.setMultiTouchControls(true);
         mc = (MapController) osm.getController();
-        textView = (TextView) findViewById(R.id.textView1);
-        GeoPoint point = new GeoPoint(48.5583, 9.33708);
-        Marker marker = new Marker(osm);
-        marker.setPosition(point);
-        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-         mc.animateTo(point);
-         mc.setZoom(14);
-        /*
-         * You can add ADDITIONAL MARKER IMAGES by adding PNG files to the path:
-         * app/src/main/res/drawable
-         */
-        // marker.setIcon(ContextCompat.getDrawable(this, R.drawable.position));
-        marker.setTitle("YOU");
-        osm.getOverlays().clear(); //maybe remove this for adding additional markers
-        osm.getOverlays().add(marker);
-        osm.invalidate();
-       // GeoPoint point = new GeoPoint(48.558299, 9.337079);
-        //addMarker(point);
-       // mc.animateTo(myGeoPoint);
-       // mc.setZoom(14);
+        textGeoLocation = (TextView) findViewById(R.id.geoLocationText);
+        Button resetButton = (Button) findViewById(R.id.buttonReset);
+        resetButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                osm.getOverlays().clear();
+                osm.invalidate();
+                Toast.makeText(MainActivity.this, "Map resetted", Toast.LENGTH_SHORT).show();
+            }
+        });
+        Button updateButton = (Button) findViewById(R.id.buttonUpdate);
+        updateButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
 
-        /*
+            }
+        });
+                /*
          * This part manages getting gps data whenever the location changes
          */
-        //   locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-     /*   locationListener = new LocationListener() {
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                //addMyLocation(location);
+                GeoPoint updatedPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+                textGeoLocation.setText("Latitude: "+ updatedPoint.getLatitude()+"\nLongitude: "+updatedPoint.getLongitude());
+                addMyMarker(updatedPoint);
+                mc.setZoom(14);
+                mc.animateTo(updatedPoint);
+
+                GeoPoint newPoint = new GeoPoint(48.5684, 9.33708);
+                Marker marker = new Marker(osm);
+                marker.setPosition(newPoint);
+                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                osm.getOverlays().add(marker);
+                osm.invalidate();
+                textGeoLocation.append("\n1");
             }
 
             @Override
@@ -109,11 +110,10 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
-        showMap();*/
+        showMap();
     }
-
-    /*@Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case 10:
                 showMap();
@@ -135,47 +135,16 @@ public class MainActivity extends AppCompatActivity {
         }
         /*
          * This code only executes when the permissions are allowed.
-         * It the nstarts the locationUpdate requests as well as a first geo-location
+         * It then starts the locationUpdate requests as well as a first geo-location
          * via the lastKnownLocation
          */
-    /*
+
 
         locationManager.requestLocationUpdates("gps", 5000, 0, locationListener);
         location = locationManager.getLastKnownLocation(GPS_PROVIDER);
-        addMyLocation(location);
     }
-    /*
-     * This Method combines myGeoPoint, addMarker and wirting down the longitude and latitude
-     */
-    /*
-    public void addMyLocation(Location location){
-        myGeoPoint = createGeoPointByLocation(location);
-        addMarker(myGeoPoint);
-        mc.animateTo(myGeoPoint);
-        textView.setText("Your Longitude: "+location.getLongitude()+"\nYour Latitude: "+location.getLatitude());
-        mc.setZoom(14);
-    }
-    /*
-     * This method uses a location object for creating a GeoPoint
-     */
-    /*
-    public GeoPoint createGeoPointByLocation(Location location){
-        if(location != null) {
-            GeoPoint point = new GeoPoint(location.getLongitude(), location.getLatitude());
-            return point;
-        }
-        return null;
-    }
-    /*
-     * This Method takes a GeoPoint as parameter
-     * It then continues to create a Marker Object and setting its poistion
-     * to the position of the GeoPoint.
-     * Also it anchors the marker and draws it on an overlay of the osm MapView
-     *
-     * It is important to reload the view using osm.invalidate, otherwise the
-     * app would not draw the marker
-     */
-    public void addMarker(GeoPoint point){
+
+    public void addMyMarker(GeoPoint point){
         Marker marker = new Marker(osm);
         marker.setPosition(point);
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
@@ -183,11 +152,28 @@ public class MainActivity extends AppCompatActivity {
          * You can add ADDITIONAL MARKER IMAGES by adding PNG files to the path:
          * app/src/main/res/drawable
          */
-       // marker.setIcon(ContextCompat.getDrawable(this, R.drawable.position));
+        marker.setIcon(ContextCompat.getDrawable(this, R.drawable.position));
         marker.setTitle("YOU");
         osm.getOverlays().clear(); //maybe remove this for adding additional markers
         osm.getOverlays().add(marker);
         osm.invalidate();
     }
-
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings_friends:
+                Toast.makeText(this, "Friends selected", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.action_settings_notifications:
+                Toast.makeText(this, "Notifications selected", Toast.LENGTH_SHORT).show();
+                break;
+        }
+        return true;
+    }
 }
