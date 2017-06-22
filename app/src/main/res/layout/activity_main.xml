@@ -25,10 +25,12 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
-            android:layout_marginTop="0dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintHorizontal_bias="0.0" />
 
         <Button
             android:id="@+id/buttonUpdate"
@@ -40,7 +42,6 @@
             android:layout_column="4"
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="0dp"
             android:layout_row="0"
             android:layout_weight="0.39"
             android:text="@string/app_update_map"
@@ -58,7 +59,6 @@
             android:layout_centerVertical="true"
             android:layout_marginEnd="16dp"
             android:layout_marginRight="16dp"
-            android:layout_marginTop="0dp"
             android:layout_weight="0.16"
             android:text="@string/app_reset_overlay"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
@@ -66,6 +66,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/mapView"/>
+
     </android.support.constraint.ConstraintLayout>
 
 </LinearLayout>

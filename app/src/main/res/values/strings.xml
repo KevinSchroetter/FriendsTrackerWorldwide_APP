@@ -22,9 +22,11 @@
     <string name="action_settings">Settings</string>
     <string name="menu_Friends">Friends</string>
     <string name="app_StandardString">Welcome to FriendsTrackerWorldwide!</string>
-    <string name="app_update_map">Update Map</string>
+    <string name="app_update_map">Update Marker</string>
     <string name="app_reset_overlay">Reset Overlay</string>
     <string name="menu_Notifications">Notifications</string>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="error_false_registration">The user is already registered</string>
+    <string name="app_addNewFriend">enter Friendname...</string>
+    <string name="app_Friendlist">Friendlist</string>
 </resources>

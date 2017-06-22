@@ -327,8 +327,8 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 loginParams.put("username", myUsername);
                 loginParams.put("password", myPassword);
-                loginParams.put("latitude", 48.5584);
-                loginParams.put("longitude", 9.3367);
+                loginParams.put("latitude", 48.482918);
+                loginParams.put("longitude", 9.188356);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
