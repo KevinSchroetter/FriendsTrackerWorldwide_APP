@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,6 +12,7 @@
     tools:context="com.osmap.pbfrks.friendstrackerworldwide.LoginActivity">
 
     <!-- Login progress -->
+
     <ProgressBar
         android:id="@+id/login_progress"
         style="?android:attr/progressBarStyleLarge"
@@ -69,7 +71,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:background="@color/colorPrimary"
                 android:text="@string/login_login"
+                android:textColor="@android:color/background_light"
                 android:textStyle="bold" />
 
             <Button
@@ -78,14 +82,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:background="@color/colorPrimaryDark"
                 android:text="@string/login_register"
+                android:textColor="@android:color/background_light"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/apiResult"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
+            <Button
+                android:id="@+id/closeButton"
+                style="?android:textAppearanceSmall"
+                android:layout_width="64dp"
+                android:layout_height="20dp"
+                android:layout_marginTop="16dp"
+                android:background="@color/colorAccent"
+                android:gravity="center"
+                android:text="CLOSE"
+                android:textColor="@android:color/background_light"
+                android:textStyle="bold" />
 
         </LinearLayout>
     </ScrollView>

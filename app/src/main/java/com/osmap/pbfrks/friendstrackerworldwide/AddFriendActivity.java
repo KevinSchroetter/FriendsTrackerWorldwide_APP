@@ -64,7 +64,6 @@ public class AddFriendActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
             JSONObject locationUpdateParams = new JSONObject();
             try {
                 locationUpdateParams.put("username", myUsername);

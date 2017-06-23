@@ -52,7 +52,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText myPasswordView;
     private View myProgressView;
     private View myLoginFormView;
-    private TextView myApiResultView;
+    private Button closeButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +62,6 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         apiCaller = new ApiCaller();
         // Set up the login form.
-        myApiResultView = (TextView) findViewById(R.id.apiResult);
         myUsernameView = (AutoCompleteTextView) findViewById(R.id.login_username);
 
         myPasswordView = (EditText) findViewById(R.id.login_password);
@@ -82,6 +81,13 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 attemptLogin();
+            }
+        });
+        Button closeButton = (Button) findViewById(R.id.closeButton);
+        closeButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                System.exit(0);
             }
         });
         Button registerButton = (Button) findViewById(R.id.register_button);
@@ -198,12 +204,10 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private boolean isUsernameValid(String username) {
-        //TODO: Replace this with your own logic
         return username.length()>=3;
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() >= 3;
     }
 
@@ -261,7 +265,6 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
             JSONObject loginParams = new JSONObject();
             try {
                 loginParams.put("username", myUsername);
@@ -322,7 +325,6 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
             JSONObject loginParams = new JSONObject();
             try {
                 loginParams.put("username", myUsername);

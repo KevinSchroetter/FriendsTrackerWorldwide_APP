@@ -1,7 +1,9 @@
 package com.osmap.pbfrks.friendstrackerworldwide;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.LayoutRes;
@@ -33,6 +35,11 @@ public class MyArrayAdapter extends ArrayAdapter<String> {
     private ApiCaller myApiCaller;
     private deleteFriendTask myFriendTask;
     private String myUsername;
+    private  AlertDialog.Builder removeFriendMessageBuilder;
+    AlertDialog removeFriendMessage;
+    AlertDialog removeFriendMessageConfirm;
+    int index;
+    String friendName;
     public MyArrayAdapter(Context context, ArrayList<String> values, String username) {
         super(context, -1,  values);
         this.context = context;
@@ -50,11 +57,27 @@ public class MyArrayAdapter extends ArrayAdapter<String> {
         delButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                int index = (int)v.getTag();
-                String friendName = values.get(index).toString();
-                values.remove(index);
-                attemptDeleteFriend(myUsername, friendName, context);
-                notifyDataSetChanged();
+                index = (int)v.getTag();
+                friendName = values.get(index).toString();
+                removeFriendMessageBuilder = new AlertDialog.Builder(context);
+                removeFriendMessageBuilder.setTitle("Delete "+friendName+"?");
+                removeFriendMessageBuilder.setMessage("Are you sure you want to remove "+friendName+" from your Friendlist?\n\nThis action cannot be undone!");
+                removeFriendMessageBuilder.setCancelable(false);
+                removeFriendMessageBuilder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        values.remove(index);
+                        attemptDeleteFriend(myUsername, friendName, context);
+                        notifyDataSetChanged();
+                    }
+                });
+                removeFriendMessageBuilder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        //do Nothing
+                    }
+                });
+                removeFriendMessage = removeFriendMessageBuilder.create();
+                removeFriendMessage.show();
+
             }
         });
         textView.setText(values.get(position));
@@ -73,7 +96,6 @@ public class MyArrayAdapter extends ArrayAdapter<String> {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
             JSONObject locationUpdateParams = new JSONObject();
             try {
                 locationUpdateParams.put("username", myUsername);
@@ -84,8 +106,6 @@ public class MyArrayAdapter extends ArrayAdapter<String> {
             String apiUrl = "https://friendstrackerworldwide-api.mybluemix.net/api/user/deleteFriend";
             JSONObject resultObj = new JSONObject();
             resultObj = myApiCaller.executeDelete(apiUrl,locationUpdateParams.toString());
-
-
             try {
                 if(resultObj.get("message")!=null){
                     return true;
@@ -105,7 +125,17 @@ public class MyArrayAdapter extends ArrayAdapter<String> {
             //showProgress(false);
 
             if (success) {
-                Toast.makeText(context, "Friend "+friend+" deleted!", Toast.LENGTH_SHORT).show();
+                removeFriendMessageBuilder.setTitle(friend);
+                removeFriendMessageBuilder.setMessage("...deleted!");
+                removeFriendMessageBuilder.setCancelable(false);
+                removeFriendMessageBuilder.setNegativeButton(null, null);
+                removeFriendMessageBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                //do things
+                            }
+                        });
+                removeFriendMessageConfirm = removeFriendMessageBuilder.create();
+                removeFriendMessageConfirm.show();
             } else {
                 Toast.makeText(context, "Could not delete friend!", Toast.LENGTH_SHORT).show();
             }
