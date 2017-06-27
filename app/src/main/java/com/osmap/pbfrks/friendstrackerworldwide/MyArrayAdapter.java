@@ -36,10 +36,10 @@ public class MyArrayAdapter extends ArrayAdapter<String> {
     private deleteFriendTask myFriendTask;
     private String myUsername;
     private  AlertDialog.Builder removeFriendMessageBuilder;
-    AlertDialog removeFriendMessage;
-    AlertDialog removeFriendMessageConfirm;
-    int index;
-    String friendName;
+    private AlertDialog removeFriendMessage;
+    private AlertDialog removeFriendMessageConfirm;
+    private int index;
+    private String friendName;
     public MyArrayAdapter(Context context, ArrayList<String> values, String username) {
         super(context, -1,  values);
         this.context = context;
@@ -48,7 +48,7 @@ public class MyArrayAdapter extends ArrayAdapter<String> {
     }
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
-        LayoutInflater inflater = (LayoutInflater) context. getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View friendView = inflater.inflate(R.layout.friendlist_entry, parent, false);
         myApiCaller = new ApiCaller();
         textView = (TextView) friendView.findViewById(R.id.friendName);
@@ -81,6 +81,10 @@ public class MyArrayAdapter extends ArrayAdapter<String> {
             }
         });
         textView.setText(values.get(position));
+        if(values.get(position).contains("#")){
+            delButton.setVisibility(View.INVISIBLE);
+        }
+
         return friendView;
     }
     public class deleteFriendTask extends AsyncTask<Void, Void, Boolean> {

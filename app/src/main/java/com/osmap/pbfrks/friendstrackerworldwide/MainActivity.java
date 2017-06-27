@@ -48,6 +48,7 @@ import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
     public static final String EXTRA_MESSAGE = "com.osmap.pbfrks.friendstrackerworldwide.MESSAGE";
     public static final String EXTRA_MESSAGE2 = "com.osmap.pbfrks.friendstrackerworldwide.MESSAGE2";
     public static final String EXTRA_MESSAGE3 = "com.osmap.pbfrks.friendstrackerworldwide.MESSAGE3";
+    public static final String EXTRA_MESSAGE4 = "com.osmap.pbfrks.friendstrackerworldwide.MESSAGE4";
     private MapView osm;
     private MapController mc;
     private TextView textGeoLocation;
@@ -69,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
     private double myLatitude = 10000;
     private double myLongitude = 10000;
     private Button updateButton;
-    private Button notificationButton;
+    private Button centerButton;
     private ProgressDialog dialog;
     private int initialization = 0;
     private int initializationMessage = 0;
@@ -77,9 +79,10 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
     private JSONObject resultFriends;
     private JSONObject resultFriendsMarker;
     private JSONObject resultMyMarker;
+    private JSONObject resultRequests;
 
     ApiCaller apiCaller;
-    private HashMap<String,HashMap<String, String>> myFriends;
+    private HashMap<String, Marker> myFriends;
     protected ArrayList<String> myFriendsArrayList;
     private GeoPoint myGeoPoint;
     private Marker myMarker;
@@ -95,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
     private getMyMarkerTask myMarkerTask = null;
     private addMarkerTask addTask = null;
     private deleteMarkerTask deleteTask = null;
+    private getRequestsTask requestsTask = null;
 
     private MapEventsOverlay mapEventsOverlay;
 
@@ -109,7 +113,10 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
     private String descriptionText;
     private GeoPoint addMarkerPoint;
     private SpecialMarker castedMarker;
-
+    private ArrayList<String> sendIt;
+    private Marker castedMyMarker;
+    private Button requestButton;
+    private ArrayList<String> requests;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,12 +125,15 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
         Context ctx = getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
         apiCaller = new ApiCaller();
-        myFriends = new HashMap<String, HashMap<String, String>>();
+        myFriends = new HashMap<String, Marker>();
         myFriendsArrayList = new ArrayList<String>();
         myFriendsLocationMarker = new HashMap<String, Marker>();
         myFriendsMarkerMarker = new HashMap<String, Marker>();
         myMarkerMarker = new HashMap<String,SpecialMarker>();
         myNotifications = new HashMap<String, Marker>();
+        requests = new ArrayList<String>();
+
+        sendIt = new ArrayList<String>();
         deleteMarkerMessageBuilder = new AlertDialog.Builder(MainActivity.this);
         addMarkerMessageBuilder = new AlertDialog.Builder(MainActivity.this);
 
@@ -159,7 +169,6 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                 });
                 deleteMarkerMessage = deleteMarkerMessageBuilder.create();
                 deleteMarkerMessage.show();
-                textGeoLocation.setText("Lat: "+marker.getPosition().getLatitude()+"\nLon: "+marker.getPosition().getLongitude());
             }
         };
 
@@ -177,10 +186,13 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
         setContentView(R.layout.activity_main);
         Intent intent = getIntent();
         myUsername = intent.getStringExtra(LoginActivity.EXTRA_MESSAGE);
-        notificationButton = (Button) findViewById(R.id.buttonNotification);
+        centerButton = (Button) findViewById(R.id.buttonCenter);
         updateButton = (Button) findViewById(R.id.buttonUpdate);
+        requestButton = (Button) findViewById(R.id.buttonRequest);
+        if(requests.size()<=0){
+            requestButton.setVisibility(View.INVISIBLE);
+        }
         if(initialization==0) {
-            notificationButton.setVisibility(View.INVISIBLE);
             updateButton.setVisibility(View.INVISIBLE);
             dialog = new ProgressDialog(this);
             dialog.setMessage("Please wait until we got your GPS Data...");
@@ -191,23 +203,23 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
         osm.setTileSource(TileSourceFactory.MAPNIK);
         osm.setBuiltInZoomControls(true);
         osm.setMultiTouchControls(true);
+        castedMyMarker = new Marker(osm);
         mc = (MapController) osm.getController();
         mapEventsOverlay = new MapEventsOverlay(this, this);
         textGeoLocation = (TextView) findViewById(R.id.geoLocationText);
-        notificationButton.setOnClickListener(new View.OnClickListener(){
+        centerButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                if(myNotifications.size()>0){
-                    Intent myIntent = new Intent(MainActivity.this, NotificationActivity.class);
-                    ArrayList<String> sendIt = new ArrayList<String>();
-                    for(HashMap.Entry<String,Marker> marker: myNotifications.entrySet()){
-                        sendIt.add(marker.getKey());
-                    }
-                    myIntent.putStringArrayListExtra(EXTRA_MESSAGE3,sendIt);
-                    startActivityForResult(myIntent, 4);
-                    //TODO:start notification activity
-                }
-
+                mc.animateTo(myGeoPoint);
+            }
+        });
+        requestButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                Intent reqIntent = new Intent(MainActivity.this, RequestActivity.class);
+                reqIntent.putStringArrayListExtra(EXTRA_MESSAGE4,requests);
+                reqIntent.putExtra(EXTRA_MESSAGE2,myUsername);
+                startActivityForResult(reqIntent, 5);
             }
         });
         updateButton.setOnClickListener(new View.OnClickListener(){
@@ -228,11 +240,9 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                 myLatitude = location.getLatitude();
                 myLongitude = location.getLongitude();
                 myGeoPoint = updatedPoint;
-                textGeoLocation.setText("Hello "+myUsername+"!\nLatitude: "+ myLatitude+"\nLongitude: "+myLongitude);
+                textGeoLocation.setText("Hello "+myUsername+"!\nLatitude: "+ String.format("%.6f", myLatitude)+"\nLongitude: "+String.format("%.6f", myLongitude));
                 addMyMarker();
                 mc.setZoom(14);
-                mc.animateTo(myGeoPoint);
-
 
                 if (initialization == 0){
                     updateButton.setVisibility(View.VISIBLE);
@@ -281,8 +291,6 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
 
         osm.getOverlays().add(0, mapEventsOverlay);
         osm.invalidate();
-        updateNotifications();
-
     }
 
 
@@ -344,6 +352,14 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                 intent.putExtra(EXTRA_MESSAGE,myFriendsArrayList);
                 intent.putExtra(EXTRA_MESSAGE2,myUsername);
                 startActivityForResult(intent, 3);
+                break;
+            case R.id.action_settings_nearby:
+                Intent myIntent = new Intent(MainActivity.this, NotificationActivity.class);
+                sendIt.clear();
+                myNotifications.clear();
+                updateNotifications();
+                myIntent.putStringArrayListExtra(EXTRA_MESSAGE3, sendIt);
+                startActivityForResult(myIntent, 4);
                 break;
             case R.id.action_settings_close:
                 System.exit(0);
@@ -491,7 +507,6 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                 myFriendsLocationMarker.clear();
                 myFriends.clear();
                 myFriendsArrayList.clear();
-                myNotifications.clear();
                 if(resultFriends.has("friendsLocation")){
                     try {
 
@@ -499,11 +514,11 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                         for (int i = 0; i< friends.length(); i++){
                             JSONObject friendJSON = friends.getJSONObject(i);
                             JSONObject friendLocation = friendJSON.getJSONObject("geoLocation");
-                            HashMap<String,String> friendInfo = new HashMap<String,String>();
-                            friendInfo.put("username", friendJSON.get("username").toString());
-                            friendInfo.put("latitude", friendLocation.get("latitude").toString());
-                            friendInfo.put("longitude", friendLocation.get("longitude").toString());
-                            friendInfo.put("description",friendJSON.get("description").toString());
+                            //HashMap<String,String> friendInfo = new HashMap<String,String>();
+                            //friendInfo.put("username", friendJSON.get("username").toString());
+                           // friendInfo.put("latitude", friendLocation.get("latitude").toString());
+                           // friendInfo.put("longitude", friendLocation.get("longitude").toString());
+                           // friendInfo.put("description",friendJSON.get("description").toString());
                             double friendLat = Double.parseDouble(friendLocation.get("latitude").toString());
                             double friendLon = Double.parseDouble(friendLocation.get("longitude").toString());
                             GeoPoint friendPoint = new GeoPoint(friendLat, friendLon);
@@ -511,20 +526,22 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                             friendMarker.setPosition(friendPoint);
                             friendMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
                             friendMarker.setIcon(ContextCompat.getDrawable(MainActivity.this, R.drawable.person));
-                            friendMarker.setTitle(friendJSON.get("description").toString());
-                            myFriendsLocationMarker.put(friendJSON.get("username").toString(), friendMarker);
-                            myFriends.put(friendJSON.get("username").toString(), friendInfo);
-                            myFriendsArrayList.add(friendJSON.get("username").toString());
-                            double dist = distanceBetween(myLatitude, myLongitude, friendLat, friendLon);
-                            if(dist <= radius){
-                                myNotifications.put(friendMarker.getTitle(),friendMarker);
+                            String ending = "s";
+
+                            if(friendJSON.get("username").toString().endsWith("s") || friendJSON.get("username").toString().endsWith("x") || friendJSON.get("username").toString().endsWith("z")){
+                                ending = "'";
                             }
+                            friendMarker.setTitle(friendJSON.get("username").toString()+ending+" Position");
+                            myFriendsLocationMarker.put(friendJSON.get("username").toString(), friendMarker);
+                            myFriends.put(friendJSON.get("username").toString()+ ending + " Position", friendMarker);
+                            myFriendsArrayList.add(friendJSON.get("username").toString());
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
                 attemptGetFriendsMarker();
+                attemptGetRequests();
             }else{
                 Toast.makeText(MainActivity.this, "An error occured!", Toast.LENGTH_SHORT).show();
             }
@@ -598,12 +615,12 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                             friendMarker.setPosition(friendPoint);
                             friendMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
                             friendMarker.setIcon(ContextCompat.getDrawable(MainActivity.this, R.drawable.marker3));
-                            friendMarker.setTitle(friendJSON.get("owner").toString() + ":\n"+friendJSON.get("description").toString());
-                            myFriendsMarkerMarker.put(friendMarker.getTitle(), friendMarker);
-                            double dist = distanceBetween(myLatitude, myLongitude, friendLat, friendLon);
-                            if(dist <= radius){
-                                myNotifications.put(friendMarker.getTitle(),friendMarker);
+                            String ending = "s";
+                            if(friendJSON.get("owner").toString().endsWith("s") || friendJSON.get("owner").toString().endsWith("x") || friendJSON.get("owner").toString().endsWith("z")){
+                                ending = "'";
                             }
+                            friendMarker.setTitle(friendJSON.get("owner").toString() + ending + " Marker:\n"+friendJSON.get("description").toString());
+                            myFriendsMarkerMarker.put(friendMarker.getTitle(), friendMarker);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -611,6 +628,7 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                 }
                 if(initializationMessage == 0){
                     initDisplayMessage.show();
+                    mc.animateTo(myGeoPoint);
                     initializationMessage = 1;
                 }else{
                     Toast.makeText(MainActivity.this, "Account data updated!", Toast.LENGTH_SHORT).show();
@@ -688,7 +706,8 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                             double friendLon = Double.parseDouble(mySavedMarkersLocation.get("longitude").toString());
                             GeoPoint friendPoint = new GeoPoint(friendLat, friendLon);
                             String markerID = mySavedMarkersJSON.get("_id").toString();
-                            SpecialMarker mySpecialMarker = new SpecialMarker(osm, markerID);
+                            SpecialMarker mySpecialMarker = new SpecialMarker(osm);
+                            mySpecialMarker.updateId(markerID);
                             mySpecialMarker.setPosition(friendPoint);
                             mySpecialMarker.setAnchor(SpecialMarker.ANCHOR_CENTER, SpecialMarker.ANCHOR_BOTTOM);
                             mySpecialMarker.setIcon(ContextCompat.getDrawable(MainActivity.this, R.drawable.marker2));
@@ -750,30 +769,58 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
             }
         }
         if(requestCode == 4){
-            //TODO handle result from notifications
             if(resultCode == RESULT_OK){
                 String targetMarker = data.getStringExtra(EXTRA_MESSAGE3);
                 mc.animateTo(myNotifications.get(targetMarker).getPosition());
             }
         }
+        if(requestCode == 5){
+            //TODO handle result from requests
+            if(resultCode == RESULT_OK){
+                attemptGetFriends();
+            }
+        }
 
     }
     private void updateNotifications() {
-        if(myNotifications.size()>0){
-            notificationButton.setVisibility(View.VISIBLE);
+        String distance = "";
+        if(myMarkerMarker.size()>0) {
+            for (HashMap.Entry<String, SpecialMarker> mymarker : myMarkerMarker.entrySet()) {
+                distance = distanceBetween(myLatitude, myLongitude, mymarker.getValue().getPosition().getLatitude(), mymarker.getValue().getPosition().getLongitude());
+                castedMyMarker = new Marker(osm);
+                castedMyMarker.setPosition(mymarker.getValue().getPosition());
+                castedMyMarker.setTitle("mm" + distance + " km:\n" + mymarker.getValue().getTitle());
+                myNotifications.put(castedMyMarker.getTitle(),castedMyMarker);
+            }
         }
-        else{
-            notificationButton.setVisibility(View.INVISIBLE);
+        if(myFriends.size()>0){
+            for (HashMap.Entry<String, Marker> friend: myFriends.entrySet()){
+                distance = distanceBetween(myLatitude, myLongitude, friend.getValue().getPosition().getLatitude(), friend.getValue().getPosition().getLongitude());
+                myNotifications.put("fp" + distance + " km:\n" + friend.getKey(), friend.getValue());
+            }
+        }
+        if(myFriendsMarkerMarker.size()>0){
+            for( HashMap.Entry<String, Marker> friendMarker: myFriendsMarkerMarker.entrySet()){
+                distance = distanceBetween(myLatitude, myLongitude, friendMarker.getValue().getPosition().getLatitude(), friendMarker.getValue().getPosition().getLongitude());
+                myNotifications.put("fm" + distance + " km:\n"+friendMarker.getKey(), friendMarker.getValue());
+            }
+        }
+
+        if(myNotifications.size()>0) {
+            for (HashMap.Entry<String, Marker> marker : myNotifications.entrySet()) {
+                sendIt.add(marker.getKey());
+            }
         }
     }
-    private double distanceBetween(double lat1, double lon1, double lat2, double lon2){
+    private String distanceBetween(double lat1, double lon1, double lat2, double lon2){
         double theta = lon1 - lon2;
         double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
         dist = Math.acos(dist);
         dist = rad2deg(dist);
         dist = dist * 60 * 1.1515;
             dist = dist * 1.609344;
-        return (dist);
+        String s = String.format("%.1f", dist);
+        return (s);
     }
     private double deg2rad(double deg)
     {
@@ -923,6 +970,85 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
             deleteTask = new MainActivity.deleteMarkerTask(id);
             deleteTask.execute((Void) null);
 
+        }
+    }
+    public class getRequestsTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final String myUsername;
+
+
+        getRequestsTask(String username) {
+            myUsername = username;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            String apiUrl = "https://friendstrackerworldwide-api.mybluemix.net/api/user/getRequests/"+myUsername;
+            JSONObject resultObj = new JSONObject();
+            resultObj = apiCaller.executeGet(apiUrl);
+            if(resultObj == null){
+                return false;
+            }
+            else{
+                resultRequests = resultObj;
+                return true;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            requestsTask = null;
+            //showProgress(false);
+
+            if (success) {
+                requests.clear();
+                if(resultRequests.has("sentRequests")){
+                    try {
+                        JSONArray sentReq = resultRequests.getJSONArray("sentRequests");
+                        for (int i = 0; i< sentReq.length(); i++){
+                            requests.add("Y#"+sentReq.get(i).toString());
+                        }
+                        JSONArray openReq = resultRequests.getJSONArray("openRequests");
+                        for (int i = 0; i< openReq.length(); i++){
+                            requests.add("F#"+openReq.get(i).toString());
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if(requests.size()>0){
+                    requestButton.setVisibility(View.VISIBLE);
+                }
+                else{
+                    requestButton.setVisibility(View.INVISIBLE);
+                }
+            }
+            else{
+                Toast.makeText(MainActivity.this, "An error occured!", Toast.LENGTH_SHORT).show();
+            }
+            resultRequests = null;
+        }
+
+        @Override
+        protected void onCancelled() {
+            requestsTask = null;
+            //showProgress(false);
+        }
+    }
+
+    private void attemptGetRequests() {
+        if (requestsTask != null) {
+            return;
+        }
+
+        boolean cancel = false;
+        View focusView = null;
+        if (cancel) {
+            Toast.makeText(MainActivity.this, "An error occured!", Toast.LENGTH_SHORT).show();
+        } else {
+
+            requestsTask = new MainActivity.getRequestsTask(myUsername);
+            requestsTask.execute((Void) null);
         }
     }
 }

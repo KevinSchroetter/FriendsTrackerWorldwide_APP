@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +34,7 @@ public class NotificationAdapter extends ArrayAdapter<String> {
     private final Context context;
     private final ArrayList<String> values;
     private TextView textView;
+    private ImageView imageView;
     IStringPass iStringPass;
 
     int index;
@@ -49,6 +51,7 @@ public class NotificationAdapter extends ArrayAdapter<String> {
         View friendView = inflater.inflate(R.layout.notification_entry, parent, false);
         textView = (TextView) friendView.findViewById(R.id.markerName);
         Button showButton = (Button) friendView.findViewById(R.id.showButton);
+        imageView = (ImageView) friendView.findViewById(R.id.markerSymbol);
         showButton.setTag(new Integer(position));
         showButton.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -64,7 +67,21 @@ public class NotificationAdapter extends ArrayAdapter<String> {
 
             }
         });
-        textView.setText(values.get(position));
+        textView.setText(values.get(position).substring(2));
+        if(values.get(position).substring(0,2).equals("mm")){
+            //textView.setBackgroundColor(context.getColor(R.color.myMarkerColor));
+            imageView.setImageResource(R.drawable.marker2);
+        }
+        else if(values.get(position).substring(0,2).equals("fp")){
+            //textView.setBackgroundColor(context.getColor(R.color.myFriendPositionColor));
+            imageView.setImageResource(R.drawable.person_view);
+
+        }
+        else{
+            //textView.setBackgroundColor(context.getColor(R.color.myFriendMarkerColor));
+            imageView.setImageResource(R.drawable.marker3);
+        }
+
         return friendView;
     }
     public interface IStringPass {

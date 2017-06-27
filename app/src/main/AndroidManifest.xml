@@ -28,7 +28,8 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".FriendActivity" />
         <activity android:name=".AddFriendActivity" />
-        <activity android:name=".NotificationActivity"></activity>
+        <activity android:name=".NotificationActivity" />
+        <activity android:name=".RequestActivity"></activity>
     </application>
 
 </manifest>

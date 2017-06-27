@@ -91,7 +91,7 @@ public class AddFriendActivity extends AppCompatActivity {
             if (success) {
                 if (resultAddedFriend.has("message")) {
                     try {
-                        if (resultAddedFriend.get("message").toString().equalsIgnoreCase("added friend")) {
+                        if (resultAddedFriend.get("message").toString().equalsIgnoreCase("Friend added")) {
                             newIntent = new Intent();
                             newIntent.putExtra(EXTRA_MESSAGE3, myFriend);
                             setResult(RESULT_OK, newIntent);
@@ -99,8 +99,22 @@ public class AddFriendActivity extends AppCompatActivity {
                             finish();
                             //Toast.makeText(AddFriendActivity.this,"Friend already in Friendlist!", Toast.LENGTH_SHORT);
 
-                        } else {
+                        }
+                        else if(resultAddedFriend.get("message").toString().equalsIgnoreCase("Already sent friendrequest to this user!")){
+                            addFriendText.setError("Already sent request!");
+                        }
+                        else if(resultAddedFriend.get("message").toString().equalsIgnoreCase("added Friendrequest")){
+                            newIntent = new Intent();
+                            newIntent.putExtra(EXTRA_MESSAGE3, "#"+myFriend);
+                            setResult(RESULT_OK, newIntent);
+                            addFriendText.setError(null);
+                            finish();
+                        }
+                        else if(resultAddedFriend.get("message").toString().equalsIgnoreCase("Friend already exists")){
                             addFriendText.setError("You already have that friend!");
+                        }
+                        else {
+                            addFriendText.setError("Friend not in Database!");
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();

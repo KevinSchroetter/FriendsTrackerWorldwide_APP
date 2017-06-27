@@ -31,7 +31,8 @@ public class FriendActivity extends AppCompatActivity {
     private Intent intent;
     private Intent newestIntent;
     private int checkFriendAmount;
-    MyArrayAdapter friendListAdapter;
+    private boolean changedDataset = false;
+    private MyArrayAdapter friendListAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,12 +46,7 @@ public class FriendActivity extends AppCompatActivity {
         backButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                if (checkFriendAmount == myFriendsArrayList.size()){
-                    setResult(RESULT_CANCELED, intent);
-                }
-                else{
-                    setResult(RESULT_OK,intent);
-                }
+                setResult(RESULT_OK,intent);
                 finish();
             }
         });
@@ -65,7 +61,6 @@ public class FriendActivity extends AppCompatActivity {
             }
         });
         friendListAdapter = new MyArrayAdapter(FriendActivity.this,myFriendsArrayList, myUsername);
-        //return inflater.inflate(R.layout.activity_friend, container, false);
         ListView friendListView = (ListView) findViewById(R.id.listFriendList);
         friendListView.setAdapter(friendListAdapter);
 
@@ -74,7 +69,13 @@ public class FriendActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         if(resultCode == RESULT_OK){
             String added = data.getStringExtra(EXTRA_MESSAGE3);
-            myFriendsArrayList.add(added);
+            if(added.startsWith("#")){
+                myFriendsArrayList.add("Requested "+added);
+                changedDataset = true;
+            }
+            else {
+                myFriendsArrayList.add(added);
+            }
             friendListAdapter.notifyDataSetChanged();
         }
     }

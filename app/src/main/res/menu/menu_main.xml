@@ -8,6 +8,11 @@
         android:title="@string/menu_Friends"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_settings_nearby"
+        android:orderInCategory="100"
+        android:title="Marker Overview"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_settings_close"
         android:orderInCategory="100"
         android:title="Close App"

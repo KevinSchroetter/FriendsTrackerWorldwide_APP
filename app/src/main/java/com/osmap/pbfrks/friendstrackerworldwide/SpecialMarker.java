@@ -9,9 +9,9 @@ import org.osmdroid.views.overlay.Marker;
 
 class SpecialMarker extends Marker {
     private String id = null;
-    public SpecialMarker(MapView mapView, String id) {
+    private String description = null;
+    public SpecialMarker(MapView mapView) {
         super(mapView);
-        this.id = id;
     }
     public String getId(){
         return id;

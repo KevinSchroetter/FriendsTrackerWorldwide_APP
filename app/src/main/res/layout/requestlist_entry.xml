@@ -1,37 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/markerName"
+        android:id="@+id/requestName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/deleteButton"
         android:layout_alignParentTop="true"
-        android:layout_toStartOf="@+id/showButton"
-        android:paddingLeft="32dp"
         android:text="TextView"
         android:textAlignment="textStart"
-        android:textColor="@color/colorPrimaryDark"
         android:textSize="18sp" />
 
     <Button
-        android:id="@+id/showButton"
+        android:id="@+id/declineButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
+        android:background="@color/colorAccent"
+        android:text="DECLINE"
+        android:textColor="@android:color/background_light"
         android:layout_alignParentTop="true"
-        android:background="@color/colorPrimaryDark"
-        android:text="SHOW"
-        android:textColor="@android:color/background_light" />
+        android:layout_toStartOf="@+id/confirmButton" />
 
-    <ImageView
-        android:id="@+id/markerSymbol"
+    <Button
+        android:id="@+id/confirmButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/center"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true" />
+        android:background="@color/colorPrimary"
+        android:text="Confirm"
+        android:textColor="@android:color/background_light"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>
