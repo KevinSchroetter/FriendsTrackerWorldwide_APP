@@ -28,6 +28,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,6 +51,8 @@ import org.osmdroid.views.overlay.infowindow.InfoWindow;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements MapEventsReceiver {
@@ -99,6 +102,8 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
     private addMarkerTask addTask = null;
     private deleteMarkerTask deleteTask = null;
     private getRequestsTask requestsTask = null;
+    private mySortingTask mySortTask = null;
+    private ArrayList<String>resultCalc = new ArrayList<String>();
 
     private MapEventsOverlay mapEventsOverlay;
 
@@ -194,6 +199,7 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
         }
         if(initialization==0) {
             updateButton.setVisibility(View.INVISIBLE);
+            centerButton.setVisibility(View.INVISIBLE);
             dialog = new ProgressDialog(this);
             dialog.setMessage("Please wait until we got your GPS Data...");
             dialog.setCancelable(false);
@@ -246,6 +252,7 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
 
                 if (initialization == 0){
                     updateButton.setVisibility(View.VISIBLE);
+                    centerButton.setVisibility(View.VISIBLE);
                     attemptGetMyMarker();
                     dialog.dismiss();
                     initialization = 1;
@@ -326,7 +333,7 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
          */
 
 
-        locationManager.requestLocationUpdates("gps", 5000, 0, locationListener);
+        locationManager.requestLocationUpdates("gps", 30000, 0, locationListener);
         //location = locationManager.getLastKnownLocation(GPS_PROVIDER);
     }
 
@@ -354,12 +361,13 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                 startActivityForResult(intent, 3);
                 break;
             case R.id.action_settings_nearby:
-                Intent myIntent = new Intent(MainActivity.this, NotificationActivity.class);
                 sendIt.clear();
                 myNotifications.clear();
                 updateNotifications();
-                myIntent.putStringArrayListExtra(EXTRA_MESSAGE3, sendIt);
-                startActivityForResult(myIntent, 4);
+                break;
+            case R.id.action_settings_legend:
+                Intent inte = new Intent(MainActivity.this, LegendActivity.class);
+                startActivity(inte);
                 break;
             case R.id.action_settings_close:
                 System.exit(0);
@@ -811,6 +819,7 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                 sendIt.add(marker.getKey());
             }
         }
+        attemptSortInformation(sendIt);
     }
     private String distanceBetween(double lat1, double lon1, double lat2, double lon2){
         double theta = lon1 - lon2;
@@ -1046,9 +1055,79 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
         if (cancel) {
             Toast.makeText(MainActivity.this, "An error occured!", Toast.LENGTH_SHORT).show();
         } else {
-
             requestsTask = new MainActivity.getRequestsTask(myUsername);
             requestsTask.execute((Void) null);
+        }
+    }
+    public class mySortingTask extends AsyncTask<Void, Void, Boolean> {
+        private ArrayList<String> arrList;
+
+        mySortingTask(ArrayList<String> arrList) {
+            this.arrList = arrList;
+
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+           // if(arrList.size()>1) {
+                try {
+                Collections.sort(arrList, new Comparator<String>() {
+                    public int compare(String s1, String s2) {
+                        String dist1 = s1.substring(2);
+                        String[] splitted1 = dist1.split("km");
+                        String save1 = splitted1[0].replace(',', '.');
+                        double d1 = Double.parseDouble(save1);
+                        String dist2 = s2.substring(2);
+                        String[] splitted2 = dist2.split("km");
+                        String save2 = splitted2[0].replace(',', '.');
+                        double d2 = Double.parseDouble(save2);
+                        return Double.compare(d1, d2);
+                    }
+                });
+                }catch(NumberFormatException e){
+                    e.printStackTrace();
+                }
+                resultCalc = arrList;
+                return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            mySortTask = null;
+            if (success) {
+                //TODO: do something
+                Intent myIntent = new Intent(MainActivity.this, NotificationActivity.class);
+                myIntent.putStringArrayListExtra(EXTRA_MESSAGE3, sendIt);
+                startActivityForResult(myIntent, 4);
+                //Toast.makeText(MainActivity.this, "Updated all Markers!", Toast.LENGTH_SHORT).show();
+            } else {
+                //Toast.makeText(MainActivity.this, "Could not update all Markers!", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            mySortTask = null;
+            //showProgress(false);
+        }
+    }
+    private void attemptSortInformation(ArrayList<String> markerInformation) {
+
+        if (mySortTask != null) {
+            return;
+        }
+
+        boolean cancel = false;
+        View focusView = null;
+
+
+        if (cancel) {
+            Toast.makeText(MainActivity.this, "An error occured!", Toast.LENGTH_SHORT).show();
+        } else {
+
+            mySortTask = new MainActivity.mySortingTask(markerInformation);
+            mySortTask.execute((Void) null);
+
         }
     }
 }

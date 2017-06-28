@@ -29,7 +29,7 @@
         android:background="@color/colorAccent"
         android:paddingBottom="@dimen/fab_margin"
         android:paddingTop="@dimen/fab_margin"
-        android:text="NEARBY"
+        android:text="Marker Overview"
         android:textAlignment="center"
         android:textAllCaps="true"
         android:textSize="30sp"
