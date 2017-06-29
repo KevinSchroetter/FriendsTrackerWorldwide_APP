@@ -3,7 +3,12 @@ package com.osmap.pbfrks.friendstrackerworldwide;
 import java.util.ArrayList;
 
 /**
- * Created by kevin on 28-Jun-17.
+ * A simple quicksort algirithm used for sorting elements of a ArrayList containing MarkerCompareHelper objects by a double value
+ * @version 1.0
+ * @author Philipp Bahnmueller
+ * @author Felix Rosa
+ * @author Kevin Schroetter
+ * @deprecated not used in the project
  */
 
 public class Quicksort {

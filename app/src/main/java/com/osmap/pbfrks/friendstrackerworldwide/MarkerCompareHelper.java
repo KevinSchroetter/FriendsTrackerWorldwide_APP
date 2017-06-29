@@ -1,7 +1,12 @@
 package com.osmap.pbfrks.friendstrackerworldwide;
 
 /**
- * Created by kevin on 27-Jun-17.
+ * A Class designed for a comparison used for sorting double values using a quicksort
+ * @version 1.0
+ * @author Philipp Bahnmueller
+ * @author Felix Rosa
+ * @author Kevin Schroetter
+ * @deprecated not used in the actual project
  */
 
 public class MarkerCompareHelper {

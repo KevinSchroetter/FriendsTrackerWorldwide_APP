@@ -4,10 +4,15 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
 /**
- * Created by kevin on 21-Jun-17.
+ * A class extending Marker
+ * Used of adding an ID field which is used for deleting a marker in the application
+ * @version 1.0
+ * @author Philipp Bahnmueller
+ * @author Felix Rosa
+ * @author Kevin Schroetter
  */
 
-class SpecialMarker extends Marker {
+public class SpecialMarker extends Marker {
     private String id = null;
     private String description = null;
     public SpecialMarker(MapView mapView) {

@@ -71,7 +71,7 @@ public class AddFriendActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            String apiUrl = "https://friendstrackerworldwide-api.mybluemix.net/api/user/addFriend";
+            String apiUrl = LoginActivity.URL+"/api/user/addFriend";
             JSONObject resultObj = new JSONObject();
             resultObj = friendApiCaller.executePut(apiUrl,locationUpdateParams.toString());
                 if(resultObj==null){

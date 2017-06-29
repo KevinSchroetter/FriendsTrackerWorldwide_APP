@@ -36,75 +36,91 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * A login screen that offers login via username/password.
+ * A login screen that offers login via username/password and user registration.
+ * After login, the screen will start the MainActivity
+ * @version 1.0
+ * @author Philipp Bahnmueller
+ * @author Felix Rosa
+ * @author Kevin Schroetter
  */
 public class LoginActivity extends AppCompatActivity {
-    public static final String EXTRA_MESSAGE = "com.osmap.pbfrks.friendstrackerworldwide.MESSAGE";
-    private ApiCaller apiCaller;
     /**
-     * Keep track of the login task to ensure we can cancel it if requested.
+     * Global Server address used for all API calls within the whole project
+     * Change the value is you want to use another server where the API is running
      */
+    public static String URL = "https://friendstrackerworldwide-api.mybluemix.net";
+
+    /** Used for sending the username to the MainActivity */
+    public static final String EXTRA_MESSAGE = "com.osmap.pbfrks.friendstrackerworldwide.MESSAGE";
+    /** Used for doing the RESTFUL API requests */
+    private ApiCaller apiCaller;
+    /** Required for performing the user login */
     private UserLoginTask myAuthTask = null;
+    /** Reqired for performing the user registration */
     private UserRegTask myRegTask = null;
 
-    // UI references.
+    /** UI references */
     private AutoCompleteTextView myUsernameView;
     private EditText myPasswordView;
     private View myProgressView;
     private View myLoginFormView;
     private Button closeButton;
+    private Button loginButton;
+    private Button registerButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         super.onCreate(savedInstanceState);
+        // Set view to activity_login.xml
         setContentView(R.layout.activity_login);
         apiCaller = new ApiCaller();
-        // Set up the login form.
         myUsernameView = (AutoCompleteTextView) findViewById(R.id.login_username);
 
         myPasswordView = (EditText) findViewById(R.id.login_password);
+        // ActionListener used for reacting on a press on "enter"
         myPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                if (id == R.id.login_button || id == EditorInfo.IME_NULL) {
                     attemptLogin();
                     return true;
                 }
                 return false;
             }
         });
-
-        Button loginButton = (Button) findViewById(R.id.login_button);
+        // Allocating of buttons to related view items
+        loginButton = (Button) findViewById(R.id.login_button);
+        closeButton = (Button) findViewById(R.id.closeButton);
+        registerButton = (Button) findViewById(R.id.register_button);
+        // Performing login on click of the login button
         loginButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
             }
         });
-        Button closeButton = (Button) findViewById(R.id.closeButton);
+        // Closing the app when clicked on close button
         closeButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 System.exit(0);
             }
         });
-        Button registerButton = (Button) findViewById(R.id.register_button);
+        // Performing registration when registration button is clicked
         registerButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptRegistration();
             }
         });
-
+        // Allocating login form and login progress information from activity_login.xml to corresponding ui elements
         myLoginFormView = findViewById(R.id.login_form);
         myProgressView = findViewById(R.id.login_progress);
     }
-
-
     /**
-     * Attempts to sign in or register the account specified by the login form.
+     * Attempts to login to the account specified by the login form.
      * If there are form errors (invalid username, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
@@ -112,26 +128,22 @@ public class LoginActivity extends AppCompatActivity {
         if (myAuthTask != null) {
             return;
         }
-
-        // Reset errors.
+        // Reset errors
         myUsernameView.setError(null);
         myPasswordView.setError(null);
 
-        // Store values at the time of the login attempt.
+        // Store values from the username and password field at the time of the login attempt
         String username = myUsernameView.getText().toString();
         String password = myPasswordView.getText().toString();
-
         boolean cancel = false;
         View focusView = null;
-
-        // Check for a valid password, if the user entered one.
+        // Check for a valid password
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
             myPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = myPasswordView;
             cancel = true;
         }
-
-        // Check for a valid username.
+        // Check for a valid username
         if (TextUtils.isEmpty(username)) {
             myUsernameView.setError(getString(R.string.error_field_required));
             focusView = myUsernameView;
@@ -143,42 +155,43 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
+            // There was an error; don't attempt login and focus the first form field with an error
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
+            // Show a progress spinner and start a background task when attempting to login
             showProgress(true);
             myAuthTask = new UserLoginTask(username, password);
             myAuthTask.execute((Void) null);
-
         }
     }
+    /**
+     * Attempts to register the account specified by the login form.
+     * If there are form errors (invalid username, missing fields, etc.), the
+     * errors are presented and no actual login attempt is made.
+     */
     private void attemptRegistration() {
         if (myRegTask != null) {
             return;
         }
-
-        // Reset errors.
+        // Reset errors
         myUsernameView.setError(null);
         myPasswordView.setError(null);
 
-        // Store values at the time of the login attempt.
+        // Store values at the time of the registration attempt
         String username = myUsernameView.getText().toString();
         String password = myPasswordView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
+        // Check for a valid password
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
             myPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = myPasswordView;
             cancel = true;
         }
 
-        // Check for a valid username.
+        // Check for a valid username
         if (TextUtils.isEmpty(username)) {
             myUsernameView.setError(getString(R.string.error_field_required));
             focusView = myUsernameView;
@@ -190,38 +203,47 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
+            // There was an error; don't attempt registration and focus the first form field with an error
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
+            // Show a progress spinner for registration and start the background process
             showProgress(true);
             myRegTask = new UserRegTask(username, password);
             myRegTask.execute((Void) null);
-
         }
     }
 
+    /**
+     * Method used for validating a username
+     * @param username - The username that must be checked
+     * @return true or false depending in whether or not the validation is okay
+     */
     private boolean isUsernameValid(String username) {
         return username.length()>=3;
     }
 
+    /**
+     * Method used for validating a username
+     * @param password - The password that must be checked
+     * @return true or false depending in whether or not the validation is okay
+     */
     private boolean isPasswordValid(String password) {
         return password.length() >= 3;
     }
 
     /**
      * Shows the progress UI and hides the login form.
+     * Requires build version honeycomb for showing the progess correctly
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
+        /*
+         * On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+         * for very easy animations. If available, use these APIs to fade-in
+         * the progress spinner.
+         */
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
             myLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
             myLoginFormView.animate().setDuration(shortAnimTime).alpha(
                     show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
@@ -230,7 +252,6 @@ public class LoginActivity extends AppCompatActivity {
                     myLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
                 }
             });
-
             myProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             myProgressView.animate().setDuration(shortAnimTime).alpha(
                     show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
@@ -240,20 +261,19 @@ public class LoginActivity extends AppCompatActivity {
                 }
             });
         } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
+            /**
+             * Hiding the form when build version is not honeycomb_mr2
+             */
             myProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             myLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 
-
     /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
+     * Represents an asynchronous task used to authenticate the user in the login process calling the FTW API
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
+        // Defining the variables used for the login
         private final String myUsername;
         private final String myPassword;
 
@@ -263,20 +283,29 @@ public class LoginActivity extends AppCompatActivity {
             myUsernameView.setText(myUsername);
         }
 
+        /**
+         * Method used for performing a background task that sends information from the Application to the API for login
+         * Performing a user login
+         * @param params - a username and password that will be sent to the API
+         * @return true or false depending on reaching the API through the internet
+         */
         @Override
         protected Boolean doInBackground(Void... params) {
+            // Defining a JSONObject array used for the API call, since the api uses JSONObjects for handling requests
             JSONObject loginParams = new JSONObject();
+            // Adding required variables to the JSONObject array
             try {
                 loginParams.put("username", myUsername);
                 loginParams.put("password", myPassword);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            String apiUrl = "https://friendstrackerworldwide-api.mybluemix.net/api/user/loginUser";
+            // Defining the API route called for login
+            String apiUrl = LoginActivity.URL+"/api/user/loginUser";
             JSONObject resultObj = new JSONObject();
+            // Using an ApiCaller for executing a POST request to the apiUrl destination
             resultObj = apiCaller.executePost(apiUrl,loginParams.toString());
-
-
+            // Handling the results returned by the FTW API - either "success" or "err"
             try {
                 if(resultObj.get("success")!=null){
                     return true;
@@ -290,30 +319,41 @@ public class LoginActivity extends AppCompatActivity {
             return false;
         }
 
+        /**
+         * Method called after the background task for further execution of the application
+         * Starting the MainActivity when successfull and displaying an error when not
+         * @param success - return statement from doInBackground()
+         */
         @Override
         protected void onPostExecute(final Boolean success) {
             myAuthTask = null;
             showProgress(false);
 
             if (success) {
-               Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 intent.putExtra(EXTRA_MESSAGE,myUsername);
                 startActivity(intent);
-                //finish();
             } else {
                 myUsernameView.setError(getString(R.string.error_false_login)+"Username: "+(myUsername.equals("Kevin")));
                 myUsernameView.requestFocus();
             }
         }
 
+        /**
+         * Handling of cancelling the Task
+         */
         @Override
         protected void onCancelled() {
             myAuthTask = null;
             showProgress(false);
         }
     }
-    public class UserRegTask extends AsyncTask<Void, Void, Boolean> {
 
+    /**
+     * Represents an asynchronous task for user registration process calling the FTW API
+     */
+    public class UserRegTask extends AsyncTask<Void, Void, Boolean> {
+        // Defining the variables used for the registration
         private final String myUsername;
         private final String myPassword;
 
@@ -323,9 +363,16 @@ public class LoginActivity extends AppCompatActivity {
             myUsernameView.setText(myUsername);
         }
 
+        /**
+         * Method used for performing a background task that sends information from the Application to the API for registration
+         * @param params
+         * @return
+         */
         @Override
         protected Boolean doInBackground(Void... params) {
+            // Defining a JSONObject array used for the API call, since the api uses JSONObjects for handling requests
             JSONObject loginParams = new JSONObject();
+            // Adding required variables to the JSONObject array
             try {
                 loginParams.put("username", myUsername);
                 loginParams.put("password", myPassword);
@@ -334,11 +381,12 @@ public class LoginActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            String apiUrl = "https://friendstrackerworldwide-api.mybluemix.net/api/user/addUser";
+            // Defining the API route called for registration
+            String apiUrl = LoginActivity.URL+"/api/user/addUser";
             JSONObject resultObj = new JSONObject();
+            // Using an ApiCaller for executing a POST request to the apiUrl destination
             resultObj = apiCaller.executePost(apiUrl,loginParams.toString());
-
-
+            // Handling the results returned by the FTW API - either "success" or "err"
             try {
                 if(resultObj.get("message")!=null){
                     return true;
@@ -349,11 +397,14 @@ public class LoginActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-            //API CALL HERE
             return false;
         }
 
+        /**
+         * Method called after the background task for further execution of the application
+         * Confirming registration when successfull and displaying an error when not
+         * @param success - return statement from doInBackground()
+         */
         @Override
         protected void onPostExecute(final Boolean success) {
             myRegTask = null;
@@ -361,16 +412,15 @@ public class LoginActivity extends AppCompatActivity {
 
             if (success) {
                 Toast.makeText(LoginActivity.this, "Registration complete for user: "+myUsername, Toast.LENGTH_SHORT).show();
-
-
-                //finish();
             } else {
                 Toast.makeText(LoginActivity.this, "Registration Failed", Toast.LENGTH_SHORT).show();
                 myUsernameView.setError(getString(R.string.error_false_registration)+": "+(myUsername));
                 myUsernameView.requestFocus();
             }
         }
-
+        /**
+         * Handling of cancelling the Task
+         */
         @Override
         protected void onCancelled() {
             myRegTask = null;

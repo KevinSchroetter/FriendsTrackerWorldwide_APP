@@ -16,13 +16,28 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by FriendsTrackerWorldwide on 20-Jun-17.
+ * A Class used for making calls to an external RESTFUL API
+ * Supporting GET, POST, PUT and DELETE requests
+ * @version 1.0
+ * @author Philipp Bahnmueller
+ * @author Felix Rosa
+ * @authro Kevin Schroetter
  */
 
 public class ApiCaller {
+    /**
+     * Simple constructor just creating the object
+     */
     public ApiCaller(){
 
     }
+
+    /**
+     * Method for executing a POST request to a targetURL
+     * @param targetURL - URL of the RESTUL API service
+     * @param urlParameters - parameters that will be sent to the API
+     * @return null on failure and a JSONObject on success
+     */
     public JSONObject executePost(String targetURL,String urlParameters) {
         int timeout=15000;
         URL url;
@@ -86,6 +101,13 @@ public class ApiCaller {
         }
         return null;
     }
+
+    /**
+     * Method for executing a PUT request to a targetURL
+     * @param targetURL - URL of the RESTUL API service
+     * @param urlParameters - parameters that will be sent to the API
+     * @return null on failure and a JSONObject on success
+     */
     public JSONObject executePut(String targetURL,String urlParameters) {
         int timeout=15000;
         URL url;
@@ -149,6 +171,11 @@ public class ApiCaller {
         }
         return null;
     }
+    /**
+     * Method for executing a GET request to a targetURL
+     * @param targetURL - URL of the RESTUL API service
+     * @return null on failure and a JSONObject on success
+     */
     public JSONObject executeGet(String targetURL) {
         int timeout=15000;
         URL url;
@@ -205,6 +232,12 @@ public class ApiCaller {
         }
         return null;
     }
+    /**
+     * Method for executing a DELETE request to a targetURL
+     * @param targetURL - URL of the RESTUL API service
+     * @param urlParameters - parameters that will be sent to the API
+     * @return null on failure and a JSONObject on success
+     */
     public JSONObject executeDelete(String targetURL,String urlParameters) {
         int timeout=15000;
         URL url;
