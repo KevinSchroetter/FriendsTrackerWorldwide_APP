@@ -125,8 +125,8 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
     private HashMap<String, Marker> myFriendsMarkerMarker;
     /** Location of personal markers received by the FTW API used for drawing the personal markers on the map */
     private HashMap<String, SpecialMarker> myMarkerMarker;
-    /** Used for calculating distances between all objects. They will be stored in this HashMap and used for centering the map view on that a chosen marker used in NotificationActivity */
-    private HashMap <String, Marker> myNotifications;
+    /** Used for calculating distances between all objects. They will be stored in this HashMap and used for centering the map view on that a chosen marker used in OverviewActivity */
+    private HashMap <String, Marker> myOverviews;
     /** Used for receiving friend request information from the FTW API and sending the information to the RequestActivity */
     private ArrayList<String> requests;
 
@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
     /** Used for casting a normal marker to a special marker for calculating distances between the own position and other markers from friends and personal markers */
     private Marker castedMyMarker;
 
-    /** Used for sending marker information to the NotificationsActivity */
+    /** Used for sending marker information to the OverviewsActivity */
     private ArrayList<String> sendIt;
 
     /** Used for updating GPS-Location of the mobile device */
@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
         myFriendsLocationMarker = new HashMap<String, Marker>();
         myFriendsMarkerMarker = new HashMap<String, Marker>();
         myMarkerMarker = new HashMap<String,SpecialMarker>();
-        myNotifications = new HashMap<String, Marker>();
+        myOverviews = new HashMap<String, Marker>();
         requests = new ArrayList<String>();
         sendIt = new ArrayList<String>();
         deleteMarkerMessageBuilder = new AlertDialog.Builder(MainActivity.this);
@@ -418,10 +418,10 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
             case R.id.action_settings_nearby:
                 // Clearing the information of all friends, markers and personal marker data
                 sendIt.clear();
-                // Clearing the information of all friends, markers and personal markers data in myNotifications
-                myNotifications.clear();
-                // Callin updateNotifications to refill the cleared arrays and start the NotificationActivity via updateNotifications methode
-                updateNotifications();
+                // Clearing the information of all friends, markers and personal markers data in myOverviews
+                myOverviews.clear();
+                // Callin updateOverviews to refill the cleared arrays and start the OverviewActivity via updateOverviews methode
+                updateOverviews();
                 break;
             // Clicking on the "Legend" button
             case R.id.action_settings_legend:
@@ -505,12 +505,12 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                 attemptGetFriends();
             }
         }
-        // RequestCode 4 was used for calling NotificationActivity
+        // RequestCode 4 was used for calling OverviewActivity
         if(requestCode == 4){
             if(resultCode == RESULT_OK){
-                // Receiving a String indicating a marker where the user clicked on "SHOW" button of the NotificationActivity
+                // Receiving a String indicating a marker where the user clicked on "SHOW" button of the OverviewActivity
                 String targetMarker = data.getStringExtra(EXTRA_MESSAGE3);
-                mc.animateTo(myNotifications.get(targetMarker).getPosition());
+                mc.animateTo(myOverviews.get(targetMarker).getPosition());
             }
         }
         // RequestCode 5 was used for calling RequestActivity
@@ -1178,7 +1178,7 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
     }
 
     /**
-     * Represents an asynchronous task used to sort all markers in the myNotifications array by distance
+     * Represents an asynchronous task used to sort all markers in the myOverviews array by distance
      */
     public class mySortingTask extends AsyncTask<Void, Void, Boolean> {
         private ArrayList<String> arrList;
@@ -1189,9 +1189,9 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
         }
 
         /**
-         * Asynchronous task used to sort all notification elements (friends, friend markers and personal markers)
+         * Asynchronous task used to sort all Overview elements (friends, friend markers and personal markers)
          * Using a Comperator
-         * @param params - arrList representing myNotifications
+         * @param params - arrList representing myOverviews
          * @return true when everything was okay
          */
         @Override
@@ -1218,14 +1218,14 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
 
         /**
          * Method called after the background task for further execution of the application
-         * Starting the NotificationActivity and awaiting its result
+         * Starting the OverviewActivity and awaiting its result
          * @param success return statement from doInBackground()
          */
         @Override
         protected void onPostExecute(final Boolean success) {
             mySortTask = null;
             if (success) {
-                Intent myIntent = new Intent(MainActivity.this, NotificationActivity.class);
+                Intent myIntent = new Intent(MainActivity.this, OverviewActivity.class);
                 myIntent.putStringArrayListExtra(EXTRA_MESSAGE3, sendIt);
                 startActivityForResult(myIntent, 4);
             } else {
@@ -1379,11 +1379,11 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
     }
 
     /**
-     * Method used for updating the myNotifications array
+     * Method used for updating the myOverviews array
      * Uses the friends, friends marker and personal marker information, calculates the distance of those points to the users geo location and
-     * saves the results in the myNotifications array. After filling the array, attemptSortInformation is called to sort the input values by their distances
+     * saves the results in the myOverviews array. After filling the array, attemptSortInformation is called to sort the input values by their distances
      */
-    private void updateNotifications() {
+    private void updateOverviews() {
         String distance = "";
         if(myMarkerMarker.size()>0) {
             for (HashMap.Entry<String, SpecialMarker> mymarker : myMarkerMarker.entrySet()) {
@@ -1391,24 +1391,24 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                 castedMyMarker = new Marker(osm);
                 castedMyMarker.setPosition(mymarker.getValue().getPosition());
                 castedMyMarker.setTitle("mm" + distance + " km:\n" + mymarker.getValue().getTitle());
-                myNotifications.put(castedMyMarker.getTitle(),castedMyMarker);
+                myOverviews.put(castedMyMarker.getTitle(),castedMyMarker);
             }
         }
         if(myFriends.size()>0){
             for (HashMap.Entry<String, Marker> friend: myFriends.entrySet()){
                 distance = distanceBetween(myLatitude, myLongitude, friend.getValue().getPosition().getLatitude(), friend.getValue().getPosition().getLongitude());
-                myNotifications.put("fp" + distance + " km:\n" + friend.getKey(), friend.getValue());
+                myOverviews.put("fp" + distance + " km:\n" + friend.getKey(), friend.getValue());
             }
         }
         if(myFriendsMarkerMarker.size()>0){
             for( HashMap.Entry<String, Marker> friendMarker: myFriendsMarkerMarker.entrySet()){
                 distance = distanceBetween(myLatitude, myLongitude, friendMarker.getValue().getPosition().getLatitude(), friendMarker.getValue().getPosition().getLongitude());
-                myNotifications.put("fm" + distance + " km:\n"+friendMarker.getKey(), friendMarker.getValue());
+                myOverviews.put("fm" + distance + " km:\n"+friendMarker.getKey(), friendMarker.getValue());
             }
         }
 
-        if(myNotifications.size()>0) {
-            for (HashMap.Entry<String, Marker> marker : myNotifications.entrySet()) {
+        if(myOverviews.size()>0) {
+            for (HashMap.Entry<String, Marker> marker : myOverviews.entrySet()) {
                 sendIt.add(marker.getKey());
             }
         }

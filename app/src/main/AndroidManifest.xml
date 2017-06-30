@@ -28,9 +28,9 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".FriendActivity" />
         <activity android:name=".AddFriendActivity" />
-        <activity android:name=".NotificationActivity" />
+        <activity android:name=".OverviewActivity" />
         <activity android:name=".RequestActivity" />
-        <activity android:name=".LegendActivity"></activity>
+        <activity android:name=".LegendActivity" />
     </application>
 
 </manifest>

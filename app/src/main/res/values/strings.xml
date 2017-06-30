@@ -30,4 +30,8 @@
     <string name="app_addNewFriend">enter Friendname...</string>
     <string name="app_Friendlist">Friendlist</string>
     <string name="app_showNotifications">Notifications</string>
+
+    <string name="title_activity_fullscreen">FullscreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

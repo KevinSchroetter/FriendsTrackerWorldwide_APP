@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <ImageView
+        android:id="@+id/markerSymbol"
+        android:layout_width="26dp"
+        android:layout_height="31dp"
+        app:srcCompat="@drawable/center"
+        tools:layout_constraintTop_creator="1"
+        tools:layout_constraintRight_creator="1"
+        tools:layout_constraintBottom_creator="1"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="0dp"
+        tools:layout_constraintLeft_creator="1"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="1dp"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <TextView
+        android:id="@+id/markerName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingLeft="32dp"
+        android:text="TextView"
+        android:textAlignment="textStart"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="18sp"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toRightOf="@+id/markerSymbol"
+        app:layout_constraintRight_toLeftOf="@+id/showButton"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_conversion_absoluteX="32dp"
+        tools:layout_conversion_absoluteY="0dp"
+        tools:layout_conversion_absoluteWidth="256dp"
+        tools:layout_conversion_absoluteHeight="21dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp" />
+
+    <Button
+        android:id="@+id/showButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
+        android:text="SHOW"
+        android:textColor="@android:color/background_light"
+        tools:layout_editor_absoluteY="0dp"
+        app:layout_constraintRight_toRightOf="parent"
+        tools:layout_conversion_absoluteX="288dp"
+        tools:layout_conversion_absoluteY="0dp"
+        tools:layout_conversion_absoluteWidth="88dp"
+        tools:layout_conversion_absoluteHeight="48dp"
+        android:layout_marginRight="0dp" />
+
+
+</android.support.constraint.ConstraintLayout>

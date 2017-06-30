@@ -1,24 +1,15 @@
 package com.osmap.pbfrks.friendstrackerworldwide;
 
-import android.app.ActionBar;
-import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
-
-import org.osmdroid.views.overlay.infowindow.InfoWindow;
 
 import java.util.ArrayList;
 
-import static android.R.id.list;
 import static com.osmap.pbfrks.friendstrackerworldwide.AddFriendActivity.EXTRA_MESSAGE3;
 
 public class FriendActivity extends AppCompatActivity {
@@ -32,7 +23,7 @@ public class FriendActivity extends AppCompatActivity {
     private Intent newestIntent;
     private int checkFriendAmount;
     private boolean changedDataset = false;
-    private MyArrayAdapter friendListAdapter;
+    private FriendsAdapter friendListAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +51,7 @@ public class FriendActivity extends AppCompatActivity {
                 startActivityForResult(newIntent, 3);
             }
         });
-        friendListAdapter = new MyArrayAdapter(FriendActivity.this,myFriendsArrayList, myUsername);
+        friendListAdapter = new FriendsAdapter(FriendActivity.this,myFriendsArrayList, myUsername);
         ListView friendListView = (ListView) findViewById(R.id.listFriendList);
         friendListView.setAdapter(friendListAdapter);
 
@@ -78,6 +69,26 @@ public class FriendActivity extends AppCompatActivity {
             }
             friendListAdapter.notifyDataSetChanged();
         }
+    }
+
+    /**
+     * Adressing the keyevent of the mobile devices button press event.
+     * This method in particular is for the "back" button of the mobile device, which should be
+     * disabled here because the app is not supposed to only close the activity, but it SHOULD
+     * perform an update of friends information by using the extra designed "BACK TO MAP" button
+     * @param keyCode - Pressed key
+     * @param event - keyPress event
+     * @return - false for deactivating the button completely
+     */
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)  {
+        if (Integer.parseInt(android.os.Build.VERSION.SDK) > 5
+                && keyCode == KeyEvent.KEYCODE_BACK
+                && event.getRepeatCount() == 0) {
+
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }
 

@@ -6,4 +6,6 @@
     <color name="myMarkerColor">#001cba</color>
     <color name="myFriendPositionColor">#c44d04</color>
     <color name="myFriendMarkerColor">#c40404</color>
+
+    <color name="black_overlay">#66000000</color>
 </resources>

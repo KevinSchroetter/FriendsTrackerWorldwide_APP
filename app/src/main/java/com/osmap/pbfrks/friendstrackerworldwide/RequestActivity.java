@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -18,7 +17,7 @@ public class RequestActivity extends AppCompatActivity {
     private String myUsername;
     private int checkRequestAmount;
     private Button backButton;
-    private MyArrayAdapterRequest requestListAdapter;
+    private RequestAdapter requestListAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +44,7 @@ public class RequestActivity extends AppCompatActivity {
 
             }
         });
-        requestListAdapter = new MyArrayAdapterRequest(RequestActivity.this,myRequests, myUsername);
+        requestListAdapter = new RequestAdapter(RequestActivity.this,myRequests, myUsername);
         ListView requestListView = (ListView) findViewById(R.id.listRequestList);
         requestListView.setAdapter(requestListAdapter);
     }
