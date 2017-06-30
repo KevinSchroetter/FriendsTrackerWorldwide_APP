@@ -3,6 +3,7 @@ package com.osmap.pbfrks.friendstrackerworldwide;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
@@ -47,5 +48,25 @@ public class RequestActivity extends AppCompatActivity {
         requestListAdapter = new RequestAdapter(RequestActivity.this,myRequests, myUsername);
         ListView requestListView = (ListView) findViewById(R.id.listRequestList);
         requestListView.setAdapter(requestListAdapter);
+    }
+    
+    /**
+     * Adressing the keyevent of the mobile devices button press event.
+     * This method in particular is for the "back" button of the mobile device, which should be
+     * disabled here because the app is not supposed to only close the activity, but it SHOULD
+     * perform an update of friends information by using the extra designed "BACK TO MAP" button
+     * @param keyCode - Pressed key
+     * @param event - keyPress event
+     * @return - false for deactivating the button completely
+     */
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)  {
+        if (Integer.parseInt(android.os.Build.VERSION.SDK) > 5
+                && keyCode == KeyEvent.KEYCODE_BACK
+                && event.getRepeatCount() == 0) {
+
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }
