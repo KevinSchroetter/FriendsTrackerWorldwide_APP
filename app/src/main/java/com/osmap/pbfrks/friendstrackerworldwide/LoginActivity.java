@@ -35,6 +35,9 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * A login screen that offers login via username/password and user registration.
  * After login, the screen will start the MainActivity
@@ -67,6 +70,38 @@ public class LoginActivity extends AppCompatActivity {
     private Button closeButton;
     private Button loginButton;
     private Button registerButton;
+
+    /** Regex patterns used for validation of input fields */
+    private String whitespace_chars =  ""       /* dummy empty string for homogeneity */
+            + "\\u0009" // CHARACTER TABULATION
+            + "\\u000A" // LINE FEED (LF)
+            + "\\u000B" // LINE TABULATION
+            + "\\u000C" // FORM FEED (FF)
+            + "\\u000D" // CARRIAGE RETURN (CR)
+            + "\\u0020" // SPACE
+            + "\\u0085" // NEXT LINE (NEL)
+            + "\\u00A0" // NO-BREAK SPACE
+            + "\\u1680" // OGHAM SPACE MARK
+            + "\\u180E" // MONGOLIAN VOWEL SEPARATOR
+            + "\\u2000" // EN QUAD
+            + "\\u2001" // EM QUAD
+            + "\\u2002" // EN SPACE
+            + "\\u2003" // EM SPACE
+            + "\\u2004" // THREE-PER-EM SPACE
+            + "\\u2005" // FOUR-PER-EM SPACE
+            + "\\u2006" // SIX-PER-EM SPACE
+            + "\\u2007" // FIGURE SPACE
+            + "\\u2008" // PUNCTUATION SPACE
+            + "\\u2009" // THIN SPACE
+            + "\\u200A" // HAIR SPACE
+            + "\\u2028" // LINE SEPARATOR
+            + "\\u2029" // PARAGRAPH SEPARATOR
+            + "\\u202F" // NARROW NO-BREAK SPACE
+            + "\\u205F" // MEDIUM MATHEMATICAL SPACE
+            + "\\u3000" // IDEOGRAPHIC SPACE
+            ;
+    private Pattern regexUsername = Pattern.compile("[(<$&+"+whitespace_chars+",':;=?@#|>)]");
+    private Pattern regexPassword = Pattern.compile("[(<$"+whitespace_chars+",':;=?@|>)]");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -219,7 +254,18 @@ public class LoginActivity extends AppCompatActivity {
      * @return true or false depending in whether or not the validation is okay
      */
     private boolean isUsernameValid(String username) {
-        return username.length()>=3;
+        if (username.length()>=3){
+            Matcher matcher = regexUsername.matcher(username);
+            if (matcher.find()){
+                return false;
+            }
+            else{
+                return true;
+            }
+        }
+        else{
+            return false;
+        }
     }
 
     /**
@@ -228,7 +274,18 @@ public class LoginActivity extends AppCompatActivity {
      * @return true or false depending in whether or not the validation is okay
      */
     private boolean isPasswordValid(String password) {
-        return password.length() >= 3;
+        if (password.length()>=3){
+            Matcher matcher = regexPassword.matcher(password);
+            if (matcher.find()){
+                return false;
+            }
+            else{
+                return true;
+            }
+        }
+        else{
+            return false;
+        }
     }
 
     /**

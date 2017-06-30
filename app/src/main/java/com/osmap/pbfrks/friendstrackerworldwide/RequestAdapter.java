@@ -16,7 +16,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 /**
- * A calss used for designing a custom array adapter that is used together with the RequestActivity for displaying requests in a list
+ * A class used for designing a custom array adapter that is used together with the RequestActivity for displaying requests in a list
  * It uses the friendlist_entry.xml as layout for list entries to show an open friend request with two buttons for either
  * declining or confirming an open request. Also sent requests from the user are displayed only in a textfield.
  * When a open request is declined or confirmed, the entry will be deleted out of the list
@@ -224,8 +224,8 @@ public class RequestAdapter extends ArrayAdapter<String> {
             }
             // Defining the API route called for accepting a friend request
             String apiUrl = LoginActivity.URL+"/api/user/confirmFriendRequest";
-            // Using an ApiCaller for executing a DELETE request to the apiURL destination
             JSONObject resultObj = new JSONObject();
+            // Using an ApiCaller for executing a DELETE request to the apiURL destination
             resultObj = myApiCaller.executePut(apiUrl,locationUpdateParams.toString());
             // Handling the results returned by the FTW API - either "message" or "err"
             try {
@@ -241,6 +241,10 @@ public class RequestAdapter extends ArrayAdapter<String> {
             return false;
         }
 
+        /**
+         * Method used for further computation when the background task was successfull
+         * @param success - Result of doInBackground
+         */
         @Override
         protected void onPostExecute(final Boolean success) {
             myConfirmTask = null;
@@ -250,7 +254,6 @@ public class RequestAdapter extends ArrayAdapter<String> {
                 Toast.makeText(context, "Could not confirm friend!", Toast.LENGTH_SHORT).show();
             }
         }
-
         /**
          * Handling of cancelling the task
          */

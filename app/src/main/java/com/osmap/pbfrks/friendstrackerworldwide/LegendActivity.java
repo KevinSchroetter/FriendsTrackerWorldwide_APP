@@ -5,6 +5,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+/**
+ * Activity used for displaying a legend information regarding which symbol on the map
+ * represents what kind of marker
+ * @version 1.0
+ * @author Philipp Bahnmueller
+ * @author Felix Rosa
+ * @author Kevin Schroetter
+ */
 public class LegendActivity extends AppCompatActivity {
     private Button backButton;
     @Override
